@@ -11,3 +11,17 @@ library(lmtest)
 library(sandwich)
 library(modelsummary)
 library(quantreg)
+
+# 2- Import Dataset and Select Used Variables
+
+carcom22 <- read_dta("~/TesiRtE/STATA/carcom22.dta")
+rper22   <- read_dta("~/TesiRtE/STATA/rper22.dta")
+carcom22_clean <- carcom22 %>%
+  select(nquest, nord, eta, sex, studio, area3) %>%
+  rename(age = eta,
+         sex = sex,
+         edu_level = studio,
+         region3 = area3)
+
+rper22_clean <- rper22 %>%
+  select(nquest, nord, yl1)
