@@ -25,3 +25,45 @@ carcom22_clean <- carcom22 %>%
 
 rper22_clean <- rper22 %>%
   select(nquest, nord, yl1)
+
+# 3 - Creating variables
+
+carcom22_clean <- carcom22_clean %>%
+  mutate(
+    educ_years = recode(edu_level,
+      `1` = 0, `2` = 5, `3` = 8, `4` = 11,
+      `5` = 13, `6` = 16, `7` = 18, `8` = 19,
+      .default = NA_real_),
+    age2 = age^2
+  )
+
+# 4 - Merge dataset
+
+merged_data <- left_join(carcom22_clean, rper22_clean,
+                         by = c("nquest", "nord"))
+
+# 5- Filter dataset
+
+merged_data_clean <- merged_data %>%
+  filter(!is.na(yl1),
+         yl1 > 0,
+         age >= 25, age <= 65) %>%
+  mutate(ln_wage = log(yl1))
+
+# 6 - Descriptive stats
+
+datasummary(yl1 + age + educ_years ~ Mean + SD + Min + Max,
+            data = merged_data_clean, output = "html")
+
+merged_data_clean %>%
+  summarise(
+    No_or_primary     = mean(edu_level %in% c(1,2), na.rm=TRUE)*100,
+    Lower_vocational  = mean(edu_level %in% c(3,4), na.rm=TRUE)*100,
+    Upper_secondary   = mean(edu_level==5, na.rm=TRUE)*100,
+    Tertiary          = mean(edu_level %in% c(6,7,8), na.rm=TRUE)*100,
+    Region_North      = mean(region3==1, na.rm=TRUE)*100,
+    Region_Centre     = mean(region3==2, na.rm=TRUE)*100,
+    Region_SouthIsles = mean(region3==3, na.rm=TRUE)*100
+  )
+
+
